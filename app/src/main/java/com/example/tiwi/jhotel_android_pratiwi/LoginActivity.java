@@ -36,8 +36,13 @@ public class LoginActivity extends AppCompatActivity {
                 Response.Listener<String> responseListener = new Response.Listener<String> () {
                     @Override
                     public void onResponse(String response) {
-                        try{ JSONObject jsonResponse = new JSONObject(response);
+                        try{
+                            JSONObject jsonResponse = new JSONObject(response);
                             if(jsonResponse!=null) {
+                                int id = jsonResponse.getInt("id");
+                                Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
+                                myIntent.putExtra("id customer", id);
+                                LoginActivity.this.startActivity(myIntent);
                                 AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                                 builder.setMessage("Login Success") .create() .show();
                             }
