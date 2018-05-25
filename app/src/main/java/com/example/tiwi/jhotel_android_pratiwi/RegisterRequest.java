@@ -7,7 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by USER on 5/1/2018.
+ * java untuk register request
+ *
+ * @author Pratiwi Yustiana
+ * @version 08/05/2018
  */
 
 public class RegisterRequest extends StringRequest {

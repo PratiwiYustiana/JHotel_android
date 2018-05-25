@@ -4,76 +4,117 @@ import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * activity untuk membuat pesanan
+ *
+ * @author Pratiwi Yustiana
+ * @version 08/05/2018
+ */
+
 public class BuatPesananActivity extends AppCompatActivity {
-    private int currentUserId;
-    private int banyakHari;
-    private int idHotel;
+    private int currentUserid, banyakHari, idHotel;
     private double tariff;
     private String roomNumber;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Intent orderInt = getIntent();
-        currentUserId = orderInt.getIntExtra("id customer", 0);
-        roomNumber = orderInt.getStringExtra("nomor kamar", 0);
-        idHotel = orderInt.getIntExtra("id hotel",0);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_buat_pesanan);
 
-        final TextView total_biaya = (TextView) findViewById(R.id.total_biaya);
-        final TextView tariff = (TextView) findViewById(R.id.tariff);
-        final TextView room_number = (TextView) findViewById(R.id.room_number);
-        final EditText durasi_hari = (EditText) findViewById(R.id.durasi_hari);
-        final Button hitung = (Button) findViewById(R.id.hitung);
-        final Button pesan = (Button) findViewById(R.id.pesan);
+        Intent buatPesananIntent = getIntent();
+        Bundle b = buatPesananIntent.getExtras();
+        if(b!=null){
+            currentUserid = b.getInt("id_customer");
+            roomNumber = b.getString("nomor_kamar");
+            tariff = b.getDouble("dailyTariff");
+            idHotel = b.getInt("id_hotel");
 
-        hitung.setVisibility(View.VISIBLE);
-        pesan.setVisibility(View.INVISIBLE);
-        room_number.setText(roomNumber);
-        tariff.setText(Double.toString(tariff));
-        total_biaya.setText("0");
+        }
 
-        hitung.setOnClickListener(new View.OnClickListener() {
+        final TextView textViewRoomNumber = findViewById(R.id.room_number);
+        final TextView textViewTariff = findViewById(R.id.tariff);
+        final TextView textViewTotalBiaya = findViewById(R.id.total_biaya);
+        final EditText durasiInput = findViewById(R.id.durasi_hari);
+        final Button pesanButton = findViewById(R.id.pesan);
+        final Button hitungButton = findViewById(R.id.hitung);
+        final Button kembaliButton = findViewById(R.id.kembali);
+
+        pesanButton.setVisibility(View.INVISIBLE);
+        textViewRoomNumber.setText(roomNumber);
+        textViewTariff.setText(String.valueOf(tariff));
+        textViewTotalBiaya.setText("0");
+        kembaliButton.setVisibility(View.INVISIBLE);
+
+        hitungButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                hitung.setVisibility(View.INVISIBLE);
-                pesan.setVisibility(View.VISIBLE);
+            public void onClick(View view) {
+                if(TextUtils.isEmpty(durasiInput.getText().toString())){
+                    durasiInput.setError("Masukkan durasi");
+                }else {
+                    banyakHari = Integer.parseInt(durasiInput.getText().toString());
+                    textViewTotalBiaya.setText(String.valueOf(tariff * banyakHari));
+                    pesanButton.setVisibility(View.VISIBLE);
+                    hitungButton.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
 
-                banyakHari = Integer.parseInt(durasi_hari.getText().toString());
-                total_biaya.setText(Double.toString(tariff*banyakHari));
-
-                Response.Listener<String> responseListener = new Response.Listener<String>() {
+        pesanButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final String jumlah_hari = String.valueOf(banyakHari);
+                final String id_customer = String.valueOf(currentUserid);
+                final String id_hotel = String.valueOf(idHotel);
+                final String nomor_kamar = roomNumber;
+                Response.Listener<String> responseListener = new Response.Listener<String> () {
                     @Override
                     public void onResponse(String response) {
-                        try {
+                        try{
                             JSONObject jsonResponse = new JSONObject(response);
-                            if (jsonResponse != null){
+                            if(jsonResponse!=null) {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(BuatPesananActivity.this);
-                                builder.setMessage("Booking success.")
-                                        .create()
-                                        .show();
+                                builder.setMessage("Pesanan berhasil.").create().show();
                             }
-                        }
-                        catch (JSONException e){
+                        } catch (JSONException e) {
                             AlertDialog.Builder builder = new AlertDialog.Builder(BuatPesananActivity.this);
-                            builder.setMessage("Booking failed.")
-                                    .create()
-                                    .show();
+                            builder.setMessage("Pesanan gagal.").create().show();
                         }
                     }
                 };
+                BuatPesananRequest buatPesanRequest = new BuatPesananRequest
+                        (jumlah_hari,id_customer,id_hotel,nomor_kamar, responseListener);
+                RequestQueue queue = Volley.newRequestQueue(BuatPesananActivity.this);
+                queue.add(buatPesanRequest);
+                pesanButton.setVisibility(View.INVISIBLE);
+                kembaliButton.setVisibility(View.VISIBLE);
+            }
+        });
+
+        kembaliButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(BuatPesananActivity.this, MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                i.putExtra("id_customer",currentUserid);
+                startActivity(i);
             }
         });
     }
+
+
 
 }

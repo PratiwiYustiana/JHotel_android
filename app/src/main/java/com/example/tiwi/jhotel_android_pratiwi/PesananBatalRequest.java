@@ -7,24 +7,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * java untuk request login
+ * java untuk batalkan request pesanan
  *
  * @author Pratiwi Yustiana
  * @version 08/05/2018
  */
 
-public class LoginRequest extends StringRequest {
-    private static final String Regis_URL = "http://192.168.43.114:8080/logincust";
+
+public class PesananBatalRequest extends StringRequest {
+    private static final String PesananBatal_URL = "http://192.168.43.114:8080/cancelpesanan";
     private Map<String, String> params;
 
-    public LoginRequest(String email, String password, Response.Listener<String> listener) {
-        super(Method.POST, Regis_URL, listener, null);
+    public PesananBatalRequest(String id_pesanan, Response.Listener<String> listener) {
+        super(Method.POST, PesananBatal_URL, listener, null);
         params = new HashMap<>();
-        params.put("email",email);
-        params.put("password", password);
+        params.put("id pesanan",id_pesanan);
     }
+
     @Override
     public Map<String, String> getParams() {
         return params;
     }
 }
+

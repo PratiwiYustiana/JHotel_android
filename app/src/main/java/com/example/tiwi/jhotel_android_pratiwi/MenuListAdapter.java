@@ -3,7 +3,6 @@ package com.example.tiwi.jhotel_android_pratiwi;
 
 import android.content.Context;
 import android.widget.BaseExpandableListAdapter;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,23 +12,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+/**
+ * java untuk menu list adapter
+ *
+ * @author Pratiwi Yustiana
+ * @version 08/05/2018
+ */
 public class MenuListAdapter extends BaseExpandableListAdapter {
 
     private Context _context;
-    private ArrayList<Hotel> _listDataHeader; // header titles
-    // child data in format of header title, child title
-    private HashMap<Hotel, ArrayList<Room>> _listDataChild;
+    private ArrayList<Hotel> listHotel;
+    private HashMap<Hotel, ArrayList<Room>> childMapping;
 
-    public MenuListAdapter(Context context, ArrayList<Hotel> listDataHeader,
-                           HashMap<Hotel, ArrayList<Room>> listChildData) {
+    public MenuListAdapter(Context context, ArrayList<Hotel> listHotel, HashMap<Hotel, ArrayList<Room>> childMapping) {
         this._context = context;
-        this._listDataHeader = listDataHeader;
-        this._listDataChild = listChildData;
+        this.listHotel = listHotel;
+        this.childMapping=childMapping;
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosititon) {
-        return this._listDataChild.get(this._listDataHeader.get(groupPosition))
+        return this.childMapping.get(this.listHotel.get(groupPosition))
                 .get(childPosititon);
     }
 
@@ -42,7 +45,7 @@ public class MenuListAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
-        final String childText = (String) getChild(groupPosition, childPosition);
+        final String childText = ((Room) getChild(groupPosition, childPosition)).getRoomNumber();
 
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this._context
@@ -50,7 +53,7 @@ public class MenuListAdapter extends BaseExpandableListAdapter {
             convertView = infalInflater.inflate(R.layout.layout_room, null);
         }
 
-        TextView txtListChild = (TextView) convertView
+        TextView txtListChild = convertView
                 .findViewById(R.id.child);
 
         txtListChild.setText(childText);
@@ -59,18 +62,18 @@ public class MenuListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return this._listDataChild.get(this._listDataHeader.get(groupPosition))
+        return this.childMapping.get(this.listHotel.get(groupPosition))
                 .size();
     }
 
     @Override
     public Object getGroup(int groupPosition) {
-        return this._listDataHeader.get(groupPosition);
+        return this.listHotel.get(groupPosition);
     }
 
     @Override
     public int getGroupCount() {
-        return this._listDataHeader.size();
+        return this.listHotel.size();
     }
 
     @Override
@@ -81,14 +84,14 @@ public class MenuListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
-        String headerTitle = (String) getGroup(groupPosition);
+        String headerTitle = ((Hotel) getGroup(groupPosition)).getNama();
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this._context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = infalInflater.inflate(R.layout.layout_hotel, null);
         }
 
-        TextView lblListHeader = (TextView) convertView
+        TextView lblListHeader = convertView
                 .findViewById(R.id.groupHeader);
         lblListHeader.setTypeface(null, Typeface.BOLD);
         lblListHeader.setText(headerTitle);
@@ -105,6 +108,4 @@ public class MenuListAdapter extends BaseExpandableListAdapter {
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
     }
-
-
 }
